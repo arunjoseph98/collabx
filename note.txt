@@ -1,3 +1,38 @@
 #185abd - blue 
 #f9f9f9 - white
 #f59e0b
+
+
+move profile to components folder - 
+
+add chat btn
+
+
+
+
+{/* <>
+    <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 3fr" },
+            height: "calc(100vh - 64px)", // Adjusted to fit inside the screen (64px for Toolbar)
+            transition: "all 0.3s ease",
+            overflow: "hidden", // Prevents extra scrolling issues
+          }}
+        >
+          
+        </Box>
+</> */}
+
+
+
+
+===========================================================
+DB 
+==========================================================
+mongodb+srv://collabxadmin:admin123@collabx.xhnlj.mongodb.net/?retryWrites=true&w=majority&appName=collabx
+
+
+
+
+

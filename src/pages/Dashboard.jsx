@@ -1,15 +1,31 @@
 import React, { useState } from "react";
-import { Button } from "@mui/material";
-import ProfileUpdateModal from "./Profile";
-import Navbar from "../components/Navbar/Navbar";
+import { Box, Toolbar } from "@mui/material";
 import NavDrawer from "../components/Navbar/NavDrawer/NavDrawer";
-import Appbar from "../components/Navbar/AppBar/AppBar";
+import Chat from "./Chat";
+import CollabXDocs from "./CollabXDocs";
+import TxtEditor from "./TxtEditor";
+
+
+
 const Dashboard = () => {
-  const [open, setOpen] = useState(false);
+  
 
   return (
     <>
-      <NavDrawer />
+    <Box sx={{ display: 'flex' }} >
+    <NavDrawer />
+      <Box component="main" sx={{ flexGrow: 1, p: 0 ,backgroundColor: '#DADADA',minHeight:"100vh"}}>
+        <Toolbar />
+        
+          {/* <Chat/> */}
+          {/* <CollabXDocs/> */}
+        <TxtEditor/>
+       
+        
+      </Box>
+    </Box>
+      
+      
     </>
   );
 };

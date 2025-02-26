@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   BottomNavigation,
   BottomNavigationAction,
@@ -18,8 +18,10 @@ import {
 import { menuItems } from "../consts/navbarItems";
 import { StyledDrawer, StyledListItem, IconWrapper } from "../navStyles";
 import Appbar from "../AppBar/AppBar";
+import { chatContext } from "../../../ContextAPI/ChatContextAPI";
 
 const NavDrawer = () => {
+  const { selectedUser } = useContext(chatContext);
   const [activeItem, setActiveItem] = useState("home");
   const [bottomNavValue, setBottomNavValue] = useState("home");
 
@@ -36,27 +38,27 @@ const NavDrawer = () => {
 
       {/* Show Drawer for Desktop */}
       {!isMobile && (
-        <StyledDrawer variant="permanent" anchor="left">
+        <StyledDrawer variant="permanent" anchor="left" sx={{overflow: 'hidden'}}>
           <Toolbar />
           <List>
             {menuItems.map((item) => (
               <Tooltip key={item.id} title={item.label} placement="right" arrow>
                 <StyledListItem
-                  button
+                  component="button"
                   onClick={() => handleNavigation(item.id)}
                   className={activeItem === item.id ? "active" : ""}
                   aria-label={item.label}
                   sx={{
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "center",
-                    textAlign: "center",
-                    paddingY: 1,
+                    paddingY: 2,
+                    border:"none",
+                    
                   }}
                 >
                   {/* Center Icon */}
                   <ListItemIcon sx={{ minWidth: "auto", display: "flex", justifyContent: "center" }}>
-                    <IconWrapper>
+                    <IconWrapper className={activeItem === item.id ? "active" : ""}>
                       <item.icon />
                     </IconWrapper>
                   </ListItemIcon>
@@ -64,7 +66,7 @@ const NavDrawer = () => {
                   {/* Text with Controlled Font Size */}
                   <ListItemText
                     primary={
-                      <Typography variant="caption" sx={{ fontSize: "0.75rem", textAlign: "center" }}>
+                      <Typography variant="caption" sx={{ fontSize: "0.65rem", textAlign: "center" }}>
                         {item.label}
                       </Typography>
                     }
@@ -77,7 +79,7 @@ const NavDrawer = () => {
       )}
 
       {/* Show Bottom Navigation for Mobile */}
-      {isMobile && (
+      {(isMobile && !selectedUser) && (
         <Box sx={{ position: "fixed", bottom: 0, width: "100%", zIndex: 1000, boxShadow: 3 }}>
           <BottomNavigation
             showLabels

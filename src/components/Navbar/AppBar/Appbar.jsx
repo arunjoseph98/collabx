@@ -42,7 +42,7 @@ function Appbar() {
 
   return (
     <AppBar position="fixed" sx={navBarStyles.appbar}>
-      <Container maxWidth="xl">
+      <Container maxWidth="100vw">
         <Toolbar disableGutters>
           {/* Desktop Logo */}
           <Box sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}>
@@ -80,7 +80,7 @@ function Appbar() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="User Avatar" src="" />
+                <Avatar alt="User Avatar" src=""    sx={{ width: 35, height: 35 }} />
               </IconButton>
             </Tooltip>
             <Menu

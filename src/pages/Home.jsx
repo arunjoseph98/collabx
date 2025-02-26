@@ -94,7 +94,7 @@ const Home = () => {
                     textAlign={{ xs: "center", sm: "left" }}
                     sx={{ mt: 2, fontSize: 20 }}
                   >
-                    Real-time collaborative editing, chat, and whiteboarding—all
+                    Real-time collaborative editing and chat — all
                     in one powerful tool.
                   </Typography>
                   <Button  component={Link} to="/signup" variant="contained" size="large" sx={{background:"#f59e0b"}}>
@@ -114,6 +114,7 @@ const Home = () => {
                 sx={{
                   width: { xs: "100%", sm: "70%", md: "80%" ,lg:"90%" }, // Full width on small screens, 80% on larger screens
                   maxWidth: 500,
+                  
                 }}
               />
             </Grid>
@@ -123,7 +124,7 @@ const Home = () => {
           <Grid container spacing={4} justifyContent="center" sx={{ mt: 20 }}>
             {features.map((feature, index) => (
               <Grid xs={12} sm={6} md={4} key={index}>
-                <Card sx={{ textAlign: "center", p: 2 }}>
+                <Card sx={{ textAlign: "center", p: 2 ,borderRadius:10 }}>
                   <CardContent>
                     <Box sx={{ fontSize: 50, color: "primary.main", mb: 2 }}>
                       {feature.icon}
