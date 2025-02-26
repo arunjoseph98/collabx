@@ -20,7 +20,7 @@ const DocsHeader = ({ initialTitle = "Untitled Document" }) => {
         justifyContent: "space-between",
         padding: "10px 20px",
         borderBottom: "1px solid #ddd",
-        backgroundColor: "#185abd",
+        backgroundColor: "#134692",
       }}
     >
       {/* Back Button */}
