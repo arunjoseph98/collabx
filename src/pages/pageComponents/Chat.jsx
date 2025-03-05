@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
 import { Box } from "@mui/material";
-import ChatArea from "../components/Chat/ChatArea";
-import { chatContext } from "../ContextAPI/ChatContextAPI";
-import ChatList from "../components/Chat/ChatList";
+import ChatArea from "../../components/Chat/ChatArea";
+import { chatContext } from "../../ContextAPI/ChatContextAPI";
+import ChatList from "../../components/Chat/ChatList";
 
 const Chat = () => {
   const { selectedUser } = useContext(chatContext);

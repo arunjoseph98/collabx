@@ -14,10 +14,18 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.3",
     "@mui/material": "^6.4.3",
+    "axios": "^1.8.1",
+    "lodash": "^4.17.21",
     "quill": "^2.0.3",
+    "quill-cursors": "^4.0.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.1.5"
+    "react-router-dom": "^7.1.5",
+    "y-presence": "^0.2.3",
+    "y-quill": "^1.0.0",
+    "y-websocket": "^2.1.0",
+    "yjs": "^13.6.23",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

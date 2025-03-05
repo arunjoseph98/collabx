@@ -14,7 +14,7 @@ const TOOLBAR_OPTIONS = [
   ["clean"],
 ];
 
-const Editor = () => {
+const Editor = ({ docId }) => {
   const quillRef = useRef(null);
   const quillInstance = useRef(null);
 
@@ -25,9 +25,9 @@ const Editor = () => {
         modules: { toolbar: TOOLBAR_OPTIONS },
       });
     }
-  }, []);
+  }, [docId]);
 
-  return <div className="container" ref={quillRef} />;
+  return <div ref={quillRef} />;
 };
 
 export default Editor;

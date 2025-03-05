@@ -4,20 +4,18 @@ import NavDrawer from "../components/Navbar/NavDrawer/NavDrawer";
 import Chat from "./pageComponents/Chat";
 
 
-
-const Dashboard = () => {
+const Xchat = () => {
   
 
   return (
     <>
     <Box sx={{ display: 'flex' }} >
-    <NavDrawer />
+    <NavDrawer selectedPage={'CollabXChat'} />
       <Box component="main" sx={{ flexGrow: 1, p: 0 ,backgroundColor: '#DADADA',minHeight:"100vh"}}>
         <Toolbar />
         
           <Chat/>
-          {/* <CollabXDocs/> */}
-        {/* <TxtEditor/> */}
+         
        
         
       </Box>
@@ -28,4 +26,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Xchat;

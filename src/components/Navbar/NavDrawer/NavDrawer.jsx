@@ -19,17 +19,32 @@ import { menuItems } from "../consts/navbarItems";
 import { StyledDrawer, StyledListItem, IconWrapper } from "../navStyles";
 import Appbar from "../AppBar/AppBar";
 import { chatContext } from "../../../ContextAPI/ChatContextAPI";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const NavDrawer = () => {
+const NavDrawer = ({selectedPage}) => {
+  const navigate = useNavigate();
   const { selectedUser } = useContext(chatContext);
-  const [activeItem, setActiveItem] = useState("home");
-  const [bottomNavValue, setBottomNavValue] = useState("home");
+  const [activeItem, setActiveItem] = useState(selectedPage);
+  const [bottomNavValue, setBottomNavValue] = useState(selectedPage);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Check for mobile screen
 
   const handleNavigation = (itemId) => {
-    setActiveItem(itemId);
+    // setBottomNavValue(itemId);
+    switch (itemId) {
+      case 'UserProfile':
+        navigate("/profile");
+        break;
+      case 'CollabXDocs':
+         navigate("/docs");
+        break;
+        case 'CollabXChat':
+         navigate("/chat");
+        break;
+      default:
+        break;
+    }
   };
 
   return (
@@ -91,7 +106,9 @@ const NavDrawer = () => {
                 key={item.id}
                 label={item.label}
                 icon={<item.icon />}
+                value={item.id}
                 onClick={() => handleNavigation(item.id)}
+                
               />
             ))}
           </BottomNavigation>

@@ -1,16 +1,33 @@
 import React, { useState } from "react";
-import { TextField, Button, Typography, Box, Container, Paper, Grid} from "@mui/material";
+import { TextField, Button, Typography, Box, Container, Paper, Grid, Snackbar, Alert} from "@mui/material";
 import Logo from "../assets/Logo";
 import signupIMG from "../assets/signup_svg.svg";
 import { Margin, Padding } from "@mui/icons-material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { registerAPI } from "../services/allAPI";
 
 const Signup = () => {
+  const navigate = useNavigate()
+   const [isReg, setIsReg] = useState(false);
   const [formData, setFormData] = useState({
-    userName: "",
+    username: "",
     email: "",
     password: "",
   });
+
+  const [snackbarMsg, setSnackbarMsg] = useState("");
+  
+    const [snackbarState, setSnackbarState] = useState(false);
+  
+    const handleSnackbar = () => {
+      setSnackbarState(true);
+    };
+  
+    const handleSnackbarClose = () => {
+      setSnackbarState(false);
+    };
+
+
 
   const handleChange = (event) => {
     setFormData({
@@ -19,27 +36,49 @@ const Signup = () => {
     });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     console.log("Form submitted:", formData);
 
-    // Placeholder for API call
-    /*
-    fetch('/api/signup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Signup successful:', data);
-    })
-    .catch(error => {
-      console.error('Signup error:', error);
-    });
-    */
+    if (formData.username && formData.email && formData.password) {
+      try {
+        const result = await registerAPI(formData)
+        console.log(result);
+        
+        if (result.status == 201) {
+          setIsReg(true)
+          setSnackbarMsg(`Welcome ${result.data.username}, Please login to explore our website!!!`)
+          handleSnackbar()
+          
+          setTimeout(() => {
+          navigate('/login')
+          setIsReg(false)
+          setFormData({
+            username: "",
+            email: "",
+            password: "",
+          })},2000)
+        } else {
+          if (result.response.status == 400) {
+            handleSnackbar()
+            setSnackbarMsg(result.response.data.message);
+            setFormData({
+              username: "",
+              email: "",
+              password: "",
+            })
+          }
+        }
+
+      } catch (error) {
+        console.log(error);
+
+      }
+    }
+    else {
+      handleSnackbar()
+      setSnackbarMsg("fill the form")
+    }
   };
 
   return (
@@ -85,8 +124,8 @@ const Signup = () => {
                 fullWidth
                 label="User Name"
                 variant="outlined"
-                name="userName"
-                value={formData.userName}
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
                 sx={{ mb: 2 }}
                 required
@@ -125,6 +164,16 @@ const Signup = () => {
           </Paper>
         </Grid>
       </Grid>
+          <Snackbar
+        open={snackbarState}
+        autoHideDuration={1500}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity={isReg?"success":"error"} variant="filled" onClose={handleSnackbarClose}>
+          {snackbarMsg}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

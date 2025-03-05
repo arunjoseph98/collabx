@@ -1,23 +1,21 @@
 import React, { useState } from "react";
 import { Box, Toolbar } from "@mui/material";
 import NavDrawer from "../components/Navbar/NavDrawer/NavDrawer";
-import Chat from "./pageComponents/Chat";
+import Profile from "./pageComponents/Profile";
 
 
 
-const Dashboard = () => {
+const UserProfile = () => {
   
 
   return (
     <>
     <Box sx={{ display: 'flex' }} >
-    <NavDrawer />
+    <NavDrawer selectedPage={'UserProfile'} />
       <Box component="main" sx={{ flexGrow: 1, p: 0 ,backgroundColor: '#DADADA',minHeight:"100vh"}}>
         <Toolbar />
         
-          <Chat/>
-          {/* <CollabXDocs/> */}
-        {/* <TxtEditor/> */}
+          <Profile/>
        
         
       </Box>
@@ -28,4 +26,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default UserProfile;
