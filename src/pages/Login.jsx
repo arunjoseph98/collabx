@@ -11,8 +11,8 @@ import {
   Alert,
 } from "@mui/material";
 import Snackbar from "@mui/material/Snackbar";
-import Logo from "../assets/Logo"; // Assuming you have a Logo component
-import loginIMG from "../assets/login_svg.svg"; // Import your login image
+import Logo from "../assets/Logo";
+import loginIMG from "../assets/login_svg.svg";
 import { Link, useNavigate } from "react-router-dom";
 import { loginAPI } from "../services/allAPI";
 import useAuthStore from "../store/useAuthStore";
@@ -52,7 +52,7 @@ const Login = () => {
         console.log(result.data);
 
         if (result.status == 200) {
-          useAuthStore.getState().login(result.data.user,result.data.token);
+          useAuthStore.getState().login(result.data.user, result.data.token);
           // sessionStorage.setItem("token", result.data.token);
           setSnackbarMsg(result.data.message);
           setIsLogin(true);
@@ -63,7 +63,6 @@ const Login = () => {
               password: "",
             });
             navigate("/profile");
-            setIsLogin(false);
           }, 1500);
         } else {
           if (result.response.status == 401) {
@@ -113,7 +112,7 @@ const Login = () => {
           xs={12}
           md={6}
           sx={{
-            display: { xs: "none", sm: "none", md: "flex" }, // Use 'flex' to enable centering
+            display: { xs: "none", sm: "none", md: "flex" },
             alignItems: "center",
             justifyContent: "center",
             mt: { xs: 11, md: 0 },

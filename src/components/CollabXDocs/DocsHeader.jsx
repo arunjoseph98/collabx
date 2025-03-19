@@ -13,6 +13,7 @@ import {
   ListItemText,
   InputAdornment,
   ListItemSecondaryAction,
+  CircularProgress,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ShareIcon from "@mui/icons-material/Share";
@@ -20,79 +21,42 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { debounce } from "lodash";
-import { getDocTitleAPI, updateDocTitleAPI } from "../../services/allAPI";
+import {
+  getdocSharedUsers,
+  getDocTitleAPI,
+  updateDocTitleAPI,
+} from "../../services/allAPI";
 import useUserStore from "../../store/useUserStore";
-import useDocumentStore from '../../store/useDocumentStore';
-import * as Y from "yjs";
-import { WebsocketProvider } from "y-websocket";
+import useDocumentStore from "../../store/useDocumentStore";
 
 const DocsHeader = () => {
   const { docId } = useParams();
+  const { document, titleupdate } = useDocumentStore();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [isShareOpen, setShareOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sharedId, setSharedId] = useState([]);
+  const [loading, setLoading] = useState(false);
+  // document.collaborators
 
   // Zustand store functions
-  const { 
-    allUsers, sharedUsers, fetchUsers, addUserManually, removeUserManually 
+  const {
+    allUsers,
+    sharedUsers,
+    fetchUsers,
+    addUserManually,
+    removeUserManually,
+    getsharedUsers,
   } = useUserStore();
 
-  const { document, fetchDocument, connectWebSocket } = useDocumentStore();
-
-  const [provider, setProvider] = useState(null);
-  const [yTitle, setYTitle] = useState(null);
-
-  // Initialize WebSocket & Y.js for real-time title sync
-
-  // useEffect(() => {
-  //   if (docId) {
-  //     const ydoc = new Y.Doc();
-  //     const wsProvider = new WebsocketProvider("ws://localhost:3000", docId, ydoc);
-  //     const yText = ydoc.getText("title");
-  
-  //     setProvider(wsProvider);
-  //     setYTitle(yText);
-  
-  //     // Prevent duplicate insertion by checking if Y.js already has a title
-  //     if (yText.length === 0) {
-  //       getDocTitleAPI(docId)
-  //         .then((response) => {
-  //           if (response.status === 200) {
-  //             const fetchedTitle = response.data.title;
-  //             setTitle(fetchedTitle);
-  
-  //             if (yText.toString().trim() === "") {
-  //               yText.insert(0, fetchedTitle);
-  //             }
-  //           }
-  //         })
-  //         .catch((error) => console.error("Error fetching document title:", error));
-  //     } else {
-  //       setTitle(yText.toString());
-  //     }
-  
-  //     yText.observe(() => {
-  //       setTitle(yText.toString());
-  //     });
-  
-  //     return () => {
-  //       wsProvider.disconnect();
-  //       ydoc.destroy();
-  //     };
-  //   }
-  // }, [docId]);
-  
-
-  // Fetch document title from backend
   useEffect(() => {
-    setTitle(" ")
+    setTitle(" ");
     const fetchTitle = async () => {
       try {
         const response = await getDocTitleAPI(docId);
         if (response.status === 200) {
           setTitle(response.data.title);
-          if (yTitle) yTitle.insert(0, response.data.title);
         }
       } catch (error) {
         console.error("Error fetching document title:", error);
@@ -102,48 +66,53 @@ const DocsHeader = () => {
     if (docId) {
       fetchTitle();
     }
-  }, [docId, yTitle]);
+  }, [docId]);
 
-  // Debounced API call to update title
-// Debounced API call to update title in MongoDB
-const debouncedUpdateTitle = useCallback(
-  debounce(async (newTitle) => {
-    if (!docId || !newTitle.trim()) return; // Avoid empty titles
-
-    try {
-      const response = await updateDocTitleAPI(docId, { title: newTitle });
-
-      if (response.status !== 200) {
-        console.error("Failed to update title in DB:", response);
+  useEffect(() => {
+    setLoading(true);
+        
+    const fetchSusers = async () => {
+      try {
+        const response = await getdocSharedUsers(docId);
+        if (response.status === 200) {
+          setSharedId(response.data.collaborators);
+          fetchUsers();
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error fetching document title:", error);
       }
-    } catch (error) {
-      console.error("Error updating title:", error);
+    };
+
+    if (docId) {
+      fetchSusers();
     }
-  }, 1000),
-  [docId]
-);
+  }, [docId,sharedUsers]);
 
-// Handle title change
-const handleTitleChange = (e) => {
-  const newTitle = e.target.value;
-  setTitle(newTitle);
+  const handleTitleUpdate = async () => {
+    await titleupdate(docId, title);
+  };
 
-  if (yTitle) {
-    yTitle.delete(0, yTitle.length);
-    yTitle.insert(0, newTitle);
-  }
+  // Handle title change
+  const handleTitleChange = (e) => {
+    const newTitle = e.target.value;
+    console.log(newTitle);
 
-  debouncedUpdateTitle(newTitle); // Send update to backend
-};
+    setTitle(newTitle);
+  };
 
   // Fetch users when the Share dialog opens
-  useEffect(() => {
-    if (isShareOpen) {
-      fetchUsers();
-    }
-  }, [isShareOpen]);
+  // useEffect(() => {
+  //   if (isShareOpen) {
+  //     fetchUsers();
+  //     handleGetsharedUsers();
+  //   }
+  // }, [isShareOpen]);
 
-  const handleShareOpen = () => setShareOpen(true);
+  const handleShareOpen = () => {
+    setShareOpen(true);
+    handleGetsharedUsers();
+  }
   const handleShareClose = () => setShareOpen(false);
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
@@ -164,10 +133,27 @@ const handleTitleChange = (e) => {
     removeUserManually(docId, userEmail);
   };
 
+  const handleGetsharedUsers = () => {
+    // const sharedList = allUsers.map()
+    const sharedList = allUsers
+      .filter((user) => sharedId.includes(user._id)) // Filter users whose _id is in the ids array
+      .map((user) => user.email);
+      
+    getsharedUsers(sharedList);
+    console.log("sh", sharedList);
+    
+  };
+
   // Filter users based on search term
   const filteredUsers = allUsers.filter((user) =>
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleBackbtn = () => {
+    navigate(-1);
+    // cleanupYjs()
+  };
+// console.log("su",filteredUsers);
 
   return (
     <>
@@ -183,7 +169,7 @@ const handleTitleChange = (e) => {
         }}
       >
         {/* Back Button */}
-        <IconButton onClick={() => navigate(-1)} aria-label="Go Back">
+        <IconButton onClick={() => handleBackbtn()} aria-label="Go Back">
           <ArrowBackIcon sx={{ color: "#f9f9f9" }} />
         </IconButton>
 
@@ -192,6 +178,7 @@ const handleTitleChange = (e) => {
           variant="standard"
           value={title}
           onChange={handleTitleChange}
+          onBlur={handleTitleUpdate}
           inputProps={{
             style: {
               fontSize: "20px",
@@ -236,22 +223,26 @@ const handleTitleChange = (e) => {
           />
 
           {/* Shared Users List */}
-          <List>
-            {sharedUsers.map((userEmail) => (
-              <ListItem key={userEmail}>
-                <ListItemText primary={userEmail} />
-                <ListItemSecondaryAction>
-                  <IconButton
-                    edge="end"
-                    onClick={() => handleRemoveUser(userEmail)}
-                    color="error"
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-          </List>
+          {loading ? (
+            <CircularProgress />
+          ) : (
+            <List>
+              {sharedUsers.map((userEmail) => (
+                <ListItem key={userEmail}>
+                  <ListItemText primary={userEmail} />
+                  <ListItemSecondaryAction>
+                    <IconButton
+                      edge="end"
+                      onClick={() => handleRemoveUser(userEmail)}
+                      color="error"
+                    >
+                      <RemoveIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          )}
 
           {/* Search Results */}
           {searchTerm && (

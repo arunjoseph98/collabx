@@ -1,31 +1,121 @@
 import { create } from "zustand";
-import { getUserDocumentsAPI, loadDocAPI, saveDocAPI } from "../services/allAPI";
-import { debounce } from 'lodash';
-import * as Y from 'yjs';
-const useDocumentStore = create((set,get) => ({
+import {
+  getUserDocumentsAPI,
+  loadDocAPI,
+  saveDocAPI,
+  updateDocTitleAPI,
+} from "../services/allAPI";
+import { debounce } from "lodash";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+
+const useDocumentStore = create((set, get) => ({
   alldocuments: [],
   loading: false,
   document: {
-    title: '',
-    content: new Y.Doc(),
+    title: "",
     owner: null,
     collaborators: [],
     _id: null,
   },
-  socket: null,
-  setSocket: (socket) => set({ socket }),
-  setDocument: (newDocument) => set({ document: newDocument }),
-  updateTitle: (newTitle) =>
-    set((state) => ({ document: { ...state.document, title: newTitle } })),
-  setYDocContent: (yDoc) =>
-    set((state) => ({ document: { ...state.document, content: yDoc } })),
-  setOwner: (ownerId) =>
-    set((state) => ({ document: { ...state.document, owner: ownerId } })),
-  setCollaborators: (collaborators) =>
-    set((state) => ({ document: { ...state.document, collaborators } })),
-  setDocumentId: (id) =>
-    set((state) => ({ document: { ...state.document, _id: id } })),
- 
+
+  ydoc: null,
+  provider: null,
+  yText: null,
+  awareness: null,
+  lastSavedUpdate:null,
+  initializeYjs: async (docId, userdata) => {
+    if (get().ydoc) {
+      console.warn("Y.js already initialized.");
+      return;
+    }
+
+    try {
+      
+      
+      const response = await loadDocAPI(docId);
+      console.log(response.data);
+      const { _id,title,owner,collaborators, content   } = response.data;
+      
+      
+      // Create Y.js document
+      const ydoc = new Y.Doc();
+      // console.log(content);
+      if (content) {
+        console.log("Applying Y.js update to the document...");
+        Y.applyUpdate(ydoc, new Uint8Array(content));
+
+      } else {
+        console.warn("No content found, starting with an empty document.");
+      }
+      // console.log("docId",docId);
+      // WebSocket provider
+      const provider = new WebsocketProvider(
+        "ws://localhost:3000/",
+        docId,
+        ydoc
+      );
+
+      provider.on("status", (event) => {
+        console.log("WebSocket Status:", event.status);
+      });
+      
+      // Create shared text
+      const yText = ydoc.getText("quill");
+
+      // Awareness API for presence tracking
+      const awareness = provider.awareness;
+      
+      awareness.setLocalStateField("user", {
+        name: userdata.name,
+        color: userdata.color,
+      });
+
+      set({
+        ydoc,
+        provider,
+        yText,
+        awareness,
+        document: {
+          title,
+          owner,
+          collaborators,
+          _id,
+        },
+      });
+
+      // Track document changes & auto-save
+      get().trackChanges();
+
+      
+    } catch (error) {
+      console.error("Error", error);
+    }
+
+    // Cleanup when unmounting
+    return () => {
+      get().cleanupYjs(); // ✅ Call cleanup when unmounting
+    };
+  },
+
+  cleanupYjs: async  () => {
+    const { provider, ydoc, saveDocument } = get();
+    if (ydoc) {
+      console.log("Saving document before disconnecting...");
+      await saveDocument.flush(); // 🔹 Immediately save before cleanup
+      ydoc.off("update"); 
+    }
+    if (provider) {
+      provider.disconnect();
+      provider.destroy(); // Ensures complete cleanup
+    }
+    if (ydoc) {
+      ydoc.destroy();
+    }
+
+    set({ ydoc: null, provider: null, yText: null, awareness: null });
+  },
+
   // Fetch user's documents from backend
   fetchUserDocuments: async (userId) => {
     set({ loading: true });
@@ -39,104 +129,61 @@ const useDocumentStore = create((set,get) => ({
     }
     set({ loading: false });
   },
+ // 🔹 Save document to MongoDB (Debounced)
+saveDocument: debounce(async () => {
+  const { ydoc, document } = get();
+  if (!document._id || !ydoc) return;
 
-  // Connect WebSocket for real-time updates
-  connectWebSocket: (docId) => {
-    const ws = new WebSocket(`ws://localhost:3000/${docId}`); // Connect to the specific document
+  try {
+    const update = Y.encodeStateAsUpdate(ydoc);
+    const reqBody = { content: Array.from(update) }; // Convert to Array for JSON compatibility
 
-    ws.onopen = () => {
-      console.log('WebSocket connected');
-      get().setSocket(ws);
-      
-    };
-    
-    
-    ws.onmessage = (event) => {
-      console.log("hello");
-      try {
-        const message = JSON.parse(event.data);
-        if (message.type === 'yjsUpdate') {
-          Y.applyUpdate(get().document.content, new Uint8Array(message.update));
-        }
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
-    };
+    await saveDocAPI(document._id, reqBody);
+    console.log("Document auto-saved ✅");
 
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
-      get().setSocket(null);
-    };
+    // ✅ Store last saved state to prevent unnecessary saves
+    set({ lastSavedUpdate: update });
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-     // Function to send Y.js updates
-     get().sendUpdate = (update) => {
-      if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: 'yjsUpdate', update: Array.from(update) }));
-      } else {
-          console.error("WebSocket not open");
-      }
-  };
-  },
+  } catch (error) {
+    console.error("Error auto-saving document:", error);
+  }
+}, 5000), // Debounced save every 5 seconds if changes occur
 
- // Fetch document from MongoDB
+// 🔹 Listen for document changes & auto-save
 
-  fetchDocument: async (docId) => {
-    try {
-      const response = await loadDocAPI(docId)
-      // axios.get(`/api/documents/${docId}`); // Replace with your API endpoint
-      const { title, content, owner, collaborators, _id } = response.data;
+trackChanges: () => {
+  const { ydoc, saveDocument, lastSavedUpdate } = get();
+  if (!ydoc) return;
 
-      const yDoc = new Y.Doc();
-      if (content) {
-        Y.applyUpdate(yDoc, new Uint8Array(content.data)); // Apply the stored Y.js updates
-      }
+  ydoc.off("update");
 
-      set({
-        document: {
-          title,
-          content: yDoc,
-          owner,
-          collaborators,
-          _id,
-        },
-      });
-    } catch (error) {
-      console.error('Error fetching document:', error);
+  ydoc.on("update", debounce(() => {
+    const currentUpdate = Y.encodeStateAsUpdate(ydoc);
+
+    if (lastSavedUpdate && currentUpdate.toString() === lastSavedUpdate.toString()) {
+      console.log("No meaningful changes detected, skipping save.");
+      return;
     }
-  },
 
-  // 🟢 Save document to MongoDB
-  saveDocument: debounce(async () => {
-    const { document } = get();
-    if (!document._id) return; // Prevent saving if no doc exists
+    console.log("Change detected, scheduling save...");
+    saveDocument();
+  }, 3000)); // Throttle to reduce frequent calls
+},
 
-    try {
-      const update = Y.encodeStateAsUpdate(document.content);
-      const reqBody = {
-        title: document.title,
-        owner: document.owner,
-        collaborators: document.collaborators,
-        content: update,
-      }
-      await saveDocAPI(document._id,reqBody)
-      // await axios.post(`http://localhost:5000/document/${document._id}`, );
-      console.log('Document auto-saved ✅');
-    } catch (error) {
-      console.error('Error auto-saving document:', error);
-    }
-  }, 5000), // Save every 5 seconds if changes occur
-
-  // 🟢 Listen for document changes & auto-save
-  trackChanges: () => {
-    const { document, saveDocument } = get();
-    document.content.observe(() => {
-      saveDocument(); // Trigger auto-save on Y.js document change
-    });
-  },
+titleupdate: async (docId,title)=>{
+   try {
+      const response = await updateDocTitleAPI(docId, { title: title });
   
+      if (response.status !== 200) {
+        set((state) => ({
+          document: { ...state.document, title }, // ✅ Update local state
+        }));
+        console.error("Failed to update title in DB:", response);
+      }
+    } catch (error) {
+      console.error("Error updating title:", error);
+    }
+},
 
 }));
 

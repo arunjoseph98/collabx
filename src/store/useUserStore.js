@@ -44,6 +44,10 @@ const useUserStore = create((set, get) => ({
 
   // Reset shared users
   resetSharedUsers: () => set({ sharedUsers: [] }),
+
+  getsharedUsers:(userEmail)=>{
+    set((state) => ({ sharedUsers: [userEmail] }));
+  }
 }));
 
 export default useUserStore;

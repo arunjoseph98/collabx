@@ -20,7 +20,7 @@ const XdocsEditor = () => {
           }}
         >
           <Toolbar />
-
+          
           <TxtEditor docId={docId} />
         </Box>
       </Box>

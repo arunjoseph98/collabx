@@ -20,20 +20,16 @@ const features = [
     description: "Edit documents in real time with seamless synchronization.",
     icon: <Edit fontSize="inherit" />,
   },
-  {
-    title: "Instant Chat",
-    description: "Communicate with your team instantly while you work.",
-    icon: <Chat fontSize="inherit" />,
-  },
+ 
  
 ];
 
 const Home = () => {
   return (
-    // Full-page gradient background
+  
     <Box  sx={{
       minHeight: "100vh",
-      background: "linear-gradient(150deg, #f9f9f9, #185abd)", // Gradient background
+      background: "linear-gradient(150deg, #f9f9f9, #185abd)", 
     }}>
     <Box sx={{ display: "flex", justifyContent: "flex-end", p: 3 }}>
         <Button component={Link} to="/login" variant="contained" color="primary">
@@ -50,7 +46,6 @@ const Home = () => {
         
   
         <Box maxWidth="xl"  sx={{ padding: 6 }}>
-          {/* Hero Section with Responsive Grid */}
           <Grid
             container
             spacing={6}
@@ -59,7 +54,6 @@ const Home = () => {
               alignItems: "center",
             }}
           >
-            {/* Left Side: Logo + Text */}
             <Grid
               xs={12}
               md={6}
@@ -94,8 +88,7 @@ const Home = () => {
                     textAlign={{ xs: "center", sm: "left" }}
                     sx={{ mt: 2, fontSize: 20 }}
                   >
-                    Real-time collaborative editing and chat — all
-                    in one powerful tool.
+                    Real-time collaborative editing tool for seamless document creation and sharing.
                   </Typography>
                   <Button  component={Link} to="/signup" variant="contained" size="large" sx={{background:"#f59e0b"}}>
                     Get Started
@@ -105,14 +98,14 @@ const Home = () => {
               </Box>
             </Grid>
   
-            {/* Right Side: Image */}
+           
             <Grid xs={12} md={6} display="flex" justifyContent="center">
               <Box
                 component="img"
                 src={heroIMG}
                 alt="Collaboration"
                 sx={{
-                  width: { xs: "100%", sm: "70%", md: "80%" ,lg:"90%" }, // Full width on small screens, 80% on larger screens
+                  width: { xs: "100%", sm: "70%", md: "80%" ,lg:"90%" }, 
                   maxWidth: 500,
                   
                 }}
@@ -120,7 +113,7 @@ const Home = () => {
             </Grid>
           </Grid>
   
-          {/* Features Section */}
+       
           <Grid container spacing={4} justifyContent="center" sx={{ mt: 20 }}>
             {features.map((feature, index) => (
               <Grid xs={12} sm={6} md={4} key={index}>

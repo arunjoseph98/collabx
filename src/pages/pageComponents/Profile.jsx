@@ -122,6 +122,7 @@ const Profile = () => {
 
   useEffect(() => {
     console.log("Preview state updated:", preview);
+    if(preview)
     handelUpdateProfile();
   }, [preview]);
 
@@ -129,16 +130,23 @@ const Profile = () => {
     console.log("inside updateprofle");
 
     const { username, email, profilePic } = userData;
+    console.log(userData);
+    
     if (username && email) {
       const reqBody = new FormData();
       reqBody.append("username", username);
       reqBody.append("email", email);
-
+      console.log('r',reqBody.get("username"));
+console.log('r',reqBody.get("email"));
+      
       preview
         ? reqBody.append("profilePic", profilePic)
         : // console.log("p:",preview)
           reqBody.append("profilePic", existingProfilePic);
-
+          
+          console.log('r1',reqBody.get("username"));
+          console.log('r1',reqBody.get("email"));
+      
       const token = sessionStorage.getItem("auth-token");
       if (token) {
         const reqHeaders = {
@@ -296,7 +304,12 @@ const Profile = () => {
                   fullWidth
                   label="Name"
                   value={userData.username}
-                  disabled={!editMode}
+                  slotProps={{
+                    input: {
+                      readOnly: !editMode,
+                    },
+                  }}
+                  // disabled={!editMode}
                   onChange={(e) =>
                     setUserData({ ...userData, username: e.target.value })
                   }
@@ -308,7 +321,11 @@ const Profile = () => {
                   label="Email"
                   type="email"
                   value={userData.email}
-                  disabled={!editMode}
+                  slotProps={{
+                    input: {
+                      readOnly: !editMode,
+                    },
+                  }}
                   onChange={(e) =>
                     setUserData({ ...userData, email: e.target.value })
                   }

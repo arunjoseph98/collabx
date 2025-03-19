@@ -10,17 +10,29 @@ import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 
-
 import Logo from "../../../assets/Logo";
 import { navBarStyles } from "../navStyles";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../../../store/useAuthStore";
+import serverURL from "../../../services/serverURL";
+import { styled } from "@mui/material";
 
 const settings = ["Profile", "Logout"];
 
+const ProfileAvatar = styled(Avatar)(({ theme }) => ({
+  width: theme.spacing(15),
+  height: theme.spacing(15),
+  border: `2px solid ${theme.palette.primary.main}`,
+  cursor: "pointer",
+  transition: "transform 0.2s",
+  "&:hover": {
+    transform: "scale(1.05)",
+  },
+}));
+
 function Appbar() {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-
+  const { user, updateUser } = useAuthStore();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -63,10 +75,10 @@ function Appbar() {
           {/* Mobile Menu Icon */}
 
           {/* Mobile Logo */}
-          <Box sx={{ flexGrow: 1,display: { xs: "flex", md: "none" }}}>
+          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <Logo fillColor="#f9f9f9 " width={100} />
           </Box>
-         
+
           {/* Desktop Navigation */}
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}></Box>
 
@@ -74,11 +86,14 @@ function Appbar() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar
-                  alt="User Avatar"
-                  src=""
+                <ProfileAvatar
+                  src={`${serverURL}/uploads/${user.profilePic}`}
+                  alt={user.username}
+                  aria-label="Profile picture"
                   sx={{ width: 35, height: 35 }}
-                />
+                >
+                  {user.username.charAt(0)}
+                </ProfileAvatar>
               </IconButton>
             </Tooltip>
             <Menu
@@ -102,7 +117,6 @@ function Appbar() {
           </Box>
         </Toolbar>
       </Container>
-      
     </AppBar>
   );
 }

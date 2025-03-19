@@ -15,10 +15,5 @@ export const menuItems = [
     label: "CollabX Docs",
     route: "/docs",
   },
-  {
-    id: "CollabXChat",
-    icon: ForumOutlinedIcon,
-    label: "CollabX Chat",
-    route: "/chat",
-  },
+  
 ];

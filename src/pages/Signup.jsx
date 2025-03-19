@@ -93,7 +93,7 @@ const Signup = () => {
   xs={12}
   md={6}
   sx={{
-    display: { xs: 'none', sm: 'none', md: 'flex' }, // Use 'flex' to enable centering
+    display: { xs: 'none', sm: 'none', md: 'flex' }, 
     alignItems: "center",
     justifyContent: "center",
     mt: { xs: 11, md: 0 },
