@@ -32,11 +32,13 @@ const useUserStore = create((set, get) => ({
 
   // Remove a user manually from the shared list
   removeUserManually: async (docId, userEmail) => {
+    set({ loading: true });
     try {
       await removeSharedUserAPI(docId, userEmail);
       set((state) => ({
         sharedUsers: state.sharedUsers.filter((user) => user !== userEmail),
       }));
+      set({ loading: false });
     } catch (error) {
       console.error("Error removing user:", error);
     }
@@ -46,7 +48,7 @@ const useUserStore = create((set, get) => ({
   resetSharedUsers: () => set({ sharedUsers: [] }),
 
   getsharedUsers:(userEmail)=>{
-    set((state) => ({ sharedUsers: [userEmail] }));
+    set((state) => ({ sharedUsers: [userEmail].flat(Infinity) }));
   }
 }));
 

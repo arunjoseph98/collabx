@@ -20,14 +20,10 @@ import ShareIcon from "@mui/icons-material/Share";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-import { debounce } from "lodash";
-import {
-  getdocSharedUsers,
-  getDocTitleAPI,
-  updateDocTitleAPI,
-} from "../../services/allAPI";
+import { getdocSharedUsers, getDocTitleAPI } from "../../services/allAPI";
 import useUserStore from "../../store/useUserStore";
 import useDocumentStore from "../../store/useDocumentStore";
+import useAuthStore from "../../store/useAuthStore";
 
 const DocsHeader = () => {
   const { docId } = useParams();
@@ -37,10 +33,10 @@ const DocsHeader = () => {
   const [isShareOpen, setShareOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sharedId, setSharedId] = useState([]);
-  const [loading, setLoading] = useState(false);
-  // document.collaborators
 
-  // Zustand store functions
+  const { user } = useAuthStore();
+  const userId = user?._id;
+
   const {
     allUsers,
     sharedUsers,
@@ -48,10 +44,13 @@ const DocsHeader = () => {
     addUserManually,
     removeUserManually,
     getsharedUsers,
+    resetSharedUsers,
+    loading,
   } = useUserStore();
 
   useEffect(() => {
     setTitle(" ");
+    resetSharedUsers();
     const fetchTitle = async () => {
       try {
         const response = await getDocTitleAPI(docId);
@@ -69,15 +68,14 @@ const DocsHeader = () => {
   }, [docId]);
 
   useEffect(() => {
-    setLoading(true);
-        
+    
+
     const fetchSusers = async () => {
       try {
         const response = await getdocSharedUsers(docId);
         if (response.status === 200) {
           setSharedId(response.data.collaborators);
           fetchUsers();
-          setLoading(false);
         }
       } catch (error) {
         console.error("Error fetching document title:", error);
@@ -87,7 +85,7 @@ const DocsHeader = () => {
     if (docId) {
       fetchSusers();
     }
-  }, [docId,sharedUsers]);
+  }, [docId, sharedUsers]);
 
   const handleTitleUpdate = async () => {
     await titleupdate(docId, title);
@@ -101,18 +99,10 @@ const DocsHeader = () => {
     setTitle(newTitle);
   };
 
-  // Fetch users when the Share dialog opens
-  // useEffect(() => {
-  //   if (isShareOpen) {
-  //     fetchUsers();
-  //     handleGetsharedUsers();
-  //   }
-  // }, [isShareOpen]);
-
   const handleShareOpen = () => {
     setShareOpen(true);
     handleGetsharedUsers();
-  }
+  };
   const handleShareClose = () => setShareOpen(false);
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
@@ -121,12 +111,12 @@ const DocsHeader = () => {
     try {
       const response = await addUserManually(docId, userEmail);
       if (response.status === 200) {
-        console.log(`✅ User ${userEmail} added as a collaborator.`);
+        console.log(`User ${userEmail} added as a collaborator.`);
       } else {
-        console.error("❌ Failed to add collaborator:", response);
+        console.error("Failed to add collaborator:", response);
       }
     } catch (error) {
-      console.error("❌ Error adding collaborator:", error);
+      console.error("Error adding collaborator:", error);
     }
   };
   const handleRemoveUser = (userEmail) => {
@@ -134,26 +124,26 @@ const DocsHeader = () => {
   };
 
   const handleGetsharedUsers = () => {
-    // const sharedList = allUsers.map()
+    setSearchTerm("");
     const sharedList = allUsers
-      .filter((user) => sharedId.includes(user._id)) // Filter users whose _id is in the ids array
-      .map((user) => user.email);
-      
-    getsharedUsers(sharedList);
+      .filter((users) => sharedId.includes(users._id)) // Filter users whose id is in the ids array
+      .map((users) => users.email);
+    sharedList.length > 0 && getsharedUsers(sharedList);
     console.log("sh", sharedList);
-    
+    console.log("shu", sharedUsers);
   };
 
   // Filter users based on search term
-  const filteredUsers = allUsers.filter((user) =>
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = allUsers.filter(
+    (users) =>
+      users.email.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      users.email !== user.email
   );
 
   const handleBackbtn = () => {
     navigate(-1);
-    // cleanupYjs()
+    resetSharedUsers();
   };
-// console.log("su",filteredUsers);
 
   return (
     <>
@@ -196,6 +186,7 @@ const DocsHeader = () => {
           onClick={handleShareOpen}
           startIcon={<ShareIcon />}
           sx={{ backgroundColor: "#f9f9f9", color: "#134692" }}
+          disabled={document.owner != userId}
         >
           Share
         </Button>
@@ -227,20 +218,21 @@ const DocsHeader = () => {
             <CircularProgress />
           ) : (
             <List>
-              {sharedUsers.map((userEmail) => (
-                <ListItem key={userEmail}>
-                  <ListItemText primary={userEmail} />
-                  <ListItemSecondaryAction>
-                    <IconButton
-                      edge="end"
-                      onClick={() => handleRemoveUser(userEmail)}
-                      color="error"
-                    >
-                      <RemoveIcon />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
+              {sharedUsers.length > 0 &&
+                sharedUsers.map((userEmail) => (
+                  <ListItem key={userEmail}>
+                    <ListItemText primary={userEmail} />
+                    <ListItemSecondaryAction>
+                      <IconButton
+                        edge="end"
+                        onClick={() => handleRemoveUser(userEmail)}
+                        color="error"
+                      >
+                        <RemoveIcon />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
             </List>
           )}
 
@@ -248,18 +240,20 @@ const DocsHeader = () => {
           {searchTerm && (
             <List>
               {filteredUsers
-                .filter((user) => !sharedUsers.includes(user.email)) // Exclude already shared users
-                .map((user) => (
+                .filter(
+                  (users) => !sharedUsers.includes(users.email)
+                ) // Exclude already shared users
+                .map((users) => (
                   <ListItem
                     button
-                    key={user.email}
-                    onClick={() => handleAddUser(user.email)}
+                    key={users.email}
+                    onClick={() => handleAddUser(users.email)}
                   >
-                    <ListItemText primary={user.email} />
+                    <ListItemText primary={users.email} />
                     <ListItemSecondaryAction>
                       <IconButton
                         edge="end"
-                        onClick={() => handleAddUser(user.email)}
+                        onClick={() => handleAddUser(users.email)}
                         color="primary"
                       >
                         <AddIcon />

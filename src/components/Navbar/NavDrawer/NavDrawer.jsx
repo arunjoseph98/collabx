@@ -18,12 +18,11 @@ import {
 import { menuItems } from "../consts/navbarItems";
 import { StyledDrawer, StyledListItem, IconWrapper } from "../navStyles";
 import Appbar from "../AppBar/AppBar";
-import { chatContext } from "../../../ContextAPI/ChatContextAPI";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const NavDrawer = ({selectedPage}) => {
+const NavDrawer = ({ selectedPage }) => {
   const navigate = useNavigate();
-  const { selectedUser } = useContext(chatContext);
+
   const [activeItem, setActiveItem] = useState(selectedPage);
   const [bottomNavValue, setBottomNavValue] = useState(selectedPage);
 
@@ -33,14 +32,11 @@ const NavDrawer = ({selectedPage}) => {
   const handleNavigation = (itemId) => {
     // setBottomNavValue(itemId);
     switch (itemId) {
-      case 'UserProfile':
+      case "UserProfile":
         navigate("/profile");
         break;
-      case 'CollabXDocs':
-         navigate("/docs");
-        break;
-        case 'CollabXChat':
-         navigate("/chat");
+      case "CollabXDocs":
+        navigate("/docs");
         break;
       default:
         break;
@@ -53,7 +49,11 @@ const NavDrawer = ({selectedPage}) => {
 
       {/* Show Drawer for Desktop */}
       {!isMobile && (
-        <StyledDrawer variant="permanent" anchor="left" sx={{overflow: 'hidden'}}>
+        <StyledDrawer
+          variant="permanent"
+          anchor="left"
+          sx={{ overflow: "hidden" }}
+        >
           <Toolbar />
           <List>
             {menuItems.map((item) => (
@@ -67,13 +67,20 @@ const NavDrawer = ({selectedPage}) => {
                     display: "flex",
                     flexDirection: "column",
                     paddingY: 2,
-                    border:"none",
-                    
+                    border: "none",
                   }}
                 >
                   {/* Center Icon */}
-                  <ListItemIcon sx={{ minWidth: "auto", display: "flex", justifyContent: "center" }}>
-                    <IconWrapper className={activeItem === item.id ? "active" : ""}>
+                  <ListItemIcon
+                    sx={{
+                      minWidth: "auto",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <IconWrapper
+                      className={activeItem === item.id ? "active" : ""}
+                    >
                       <item.icon />
                     </IconWrapper>
                   </ListItemIcon>
@@ -81,7 +88,10 @@ const NavDrawer = ({selectedPage}) => {
                   {/* Text with Controlled Font Size */}
                   <ListItemText
                     primary={
-                      <Typography variant="caption" sx={{ fontSize: "0.65rem", textAlign: "center" }}>
+                      <Typography
+                        variant="caption"
+                        sx={{ fontSize: "0.65rem", textAlign: "center" }}
+                      >
                         {item.label}
                       </Typography>
                     }
@@ -94,8 +104,16 @@ const NavDrawer = ({selectedPage}) => {
       )}
 
       {/* Show Bottom Navigation for Mobile */}
-      {(isMobile && !selectedUser) && (
-        <Box sx={{ position: "fixed", bottom: 0, width: "100%", zIndex: 1000, boxShadow: 3 }}>
+      {isMobile && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: 0,
+            width: "100%",
+            zIndex: 1000,
+            boxShadow: 3,
+          }}
+        >
           <BottomNavigation
             showLabels
             value={bottomNavValue}
@@ -108,7 +126,6 @@ const NavDrawer = ({selectedPage}) => {
                 icon={<item.icon />}
                 value={item.id}
                 onClick={() => handleNavigation(item.id)}
-                
               />
             ))}
           </BottomNavigation>

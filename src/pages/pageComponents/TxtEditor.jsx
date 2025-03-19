@@ -10,7 +10,7 @@ const TxtEditor = ({docId}) => {
   return (
     <div className="editorContainer">
       <DocsHeader docId={docId} />
-      <Editor docId={docId} /> {/* Pass docId to Editor */}
+      <Editor docId={docId} /> 
     </div>
   );
 };

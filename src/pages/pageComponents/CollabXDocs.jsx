@@ -36,19 +36,19 @@ const CollabXDocs = () => {
     }
   }, [userId]);
 
-  // Menu State: Track the document for which the menu is open
+  // Menu State
   const [menuState, setMenuState] = useState({ id: null, anchorEl: null });
 
   // Snackbar State
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const handleMenuOpen = (event, docId) => {
-    event.stopPropagation(); // Prevents navigation
+    event.stopPropagation(); 
     setMenuState({ id: docId, anchorEl: event.currentTarget });
   };
 
-  const handleMenuClose = () => {
-    
+  const handleMenuClose = (event) => {
+    event.stopPropagation();
     setMenuState({ id: null, anchorEl: null });
   };
 
@@ -84,7 +84,7 @@ const CollabXDocs = () => {
 
       const response = await removeDocAPI(docId);
       if (response.status === 200) {
-        fetchUserDocuments(userId); // Refresh documents after deletion
+        fetchUserDocuments(userId); 
         setSnackbarOpen(true);
       } else {
         console.error("Error deleting document:", response);
@@ -107,12 +107,12 @@ const CollabXDocs = () => {
         p: 4,
       }}
     >
-      {/* Logo */}
+     
       <Box sx={{ mb: 2 }}>
         <XDocsLogo width={250} />
       </Box>
 
-      {/* New Document Button */}
+      
       <Button
         variant="contained"
         startIcon={<Add />}
@@ -122,7 +122,7 @@ const CollabXDocs = () => {
         New Document
       </Button>
 
-      {/* Recent Files Section */}
+      
       <Typography variant="h6" gutterBottom>
         Recent Files
       </Typography>
@@ -133,8 +133,8 @@ const CollabXDocs = () => {
         <Box sx={{
           width: "100%",
           maxWidth: 500,
-          maxHeight: "400px", // Set a max height
-          overflowY: "auto",  // Enable vertical scrolling
+          maxHeight: "400px", 
+          overflowY: "auto",  
           p: 2,
         }}>
           {alldocuments.length > 0 ? (
@@ -150,22 +150,22 @@ const CollabXDocs = () => {
                     alignItems="center"
                     justifyContent="space-between"
                   >
-                    {/* Left Side: Icon + Title */}
+                    
                     <Box display="flex" alignItems="center">
                       <Description color="primary" sx={{ mr: 1 }} />
                       <Typography variant="h6">{doc.title}</Typography>
                     </Box>
 
-                    {/* Right Side: 3-dot Menu */}
+                    
                     <IconButton onClick={(e) => handleMenuOpen(e, doc._id)}>
                       <MoreVertIcon />
                     </IconButton>
 
-                    {/* Menu Dropdown - Opens only for the clicked document */}
+                    
                     <Menu
                       anchorEl={menuState.id === doc._id ? menuState.anchorEl : null}
                       open={menuState.id === doc._id}
-                      onClose={handleMenuClose}
+                      onClose={(e) => handleMenuClose(e)}
                     >
                       <MenuItem onClick={(e) => handleDelete(e,doc._id)}>
                         <DeleteIcon sx={{ mr: 1 }} color="error" /> Delete

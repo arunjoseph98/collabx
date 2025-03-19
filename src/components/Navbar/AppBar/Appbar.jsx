@@ -14,8 +14,9 @@ import Logo from "../../../assets/Logo";
 import { navBarStyles } from "../navStyles";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../../../store/useAuthStore";
-import serverURL from "../../../services/serverURL";
+
 import { styled } from "@mui/material";
+import { serverURL } from "../../../services/serverURL";
 
 const settings = ["Profile", "Logout"];
 

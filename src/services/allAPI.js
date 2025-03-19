@@ -1,5 +1,6 @@
 import commonAPI from "./commonAPI";
-import serverURL from "./serverURL";
+import { serverURL } from "./serverURL";
+
 
 // registerAPI
 export const registerAPI = async (reqBody) => {
@@ -31,10 +32,12 @@ export const createNewDocAPI = async (userId) => {
   return commonAPI("POST", `${serverURL}/documents`, { owner: userId });
 };
 
+//get Doc Title
 export const getDocTitleAPI = async (docId) => {
   return commonAPI("GET", `${serverURL}/documents/title/${docId}`);
 };
 
+// get doc SharedUsers
 export const getdocSharedUsers = async (docId) => {
   return commonAPI("GET", `${serverURL}/documents/sharedusers/${docId}`);
 };
@@ -68,10 +71,12 @@ export const getUserDocumentsAPI = async (userId) => {
   return commonAPI("GET", `${serverURL}/documents/user/${userId}`);
 };
 
+// save doc
 export const saveDocAPI = async (docId, reqBody) => {
   return commonAPI("POST", `${serverURL}/documents/${docId}`, reqBody);
 };
 
+// load doc
 export const loadDocAPI = async (docId) => {
   return commonAPI("GET", `${serverURL}/documents/${docId}`);
 };

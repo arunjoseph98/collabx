@@ -5,7 +5,7 @@ import TxtEditor from "./pageComponents/TxtEditor";
 import { useParams } from "react-router-dom";
 
 const XdocsEditor = () => {
-    const { docId } = useParams(); // Get document ID from URL
+    const { docId } = useParams(); 
   return (
     <>
       <Box sx={{ display: "flex" }}>

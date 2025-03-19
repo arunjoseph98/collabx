@@ -23,7 +23,8 @@ import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
 import LockRoundedIcon from "@mui/icons-material/LockRounded";
 import useAuthStore from "../../store/useAuthStore";
 import { updateUserAPI, updateUserPasswordAPI } from "../../services/allAPI";
-import serverURL from "../../services/serverURL";
+import { serverURL } from "../../services/serverURL";
+
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -121,7 +122,6 @@ const Profile = () => {
   }, [userData.profilePic]);
 
   useEffect(() => {
-    console.log("Preview state updated:", preview);
     if(preview)
     handelUpdateProfile();
   }, [preview]);

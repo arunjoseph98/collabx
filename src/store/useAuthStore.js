@@ -6,23 +6,23 @@ const useAuthStore = create(
   persist(
     (set, get) => ({
       user: null, // { email, groups, profilePic, username, _id }
-      token: sessionStorage.getItem("auth-token") || null, // Load token separately
-      isAuth: Boolean(sessionStorage.getItem("auth-token")), // Check if token exists
+      token: sessionStorage.getItem("auth-token") || null, 
+      isAuth: Boolean(sessionStorage.getItem("auth-token")), 
 
       login: (userData, authToken) => {
-        sessionStorage.setItem("auth-token", authToken); // Store token separately
+        sessionStorage.setItem("auth-token", authToken); 
         set({ user: userData, token: authToken, isAuth: true });
       },
 
       logout: () => {
-        sessionStorage.removeItem("auth-token"); // Remove token
-        sessionStorage.removeItem("auth-storage"); // Remove user data
+        sessionStorage.removeItem("auth-token"); 
+        sessionStorage.removeItem("auth-storage"); 
         set({ user: null, token: null, isAuth: false });
       },
 
       updateUser: (updatedFields) => {
         set((state) => ({
-          user: { ...state.user, ...updatedFields }, // Merge new fields with existing user data
+          user: { ...state.user, ...updatedFields }, 
         }));
       },
 
