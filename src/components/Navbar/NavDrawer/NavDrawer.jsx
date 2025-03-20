@@ -17,7 +17,7 @@ import {
 
 import { menuItems } from "../consts/navbarItems";
 import { StyledDrawer, StyledListItem, IconWrapper } from "../navStyles";
-import Appbar from "../AppBar/AppBar";
+import Appbar from "../AppBar/Appbar";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const NavDrawer = ({ selectedPage }) => {
