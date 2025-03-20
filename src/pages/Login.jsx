@@ -45,7 +45,7 @@ const Login = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Form submitted:", formData);
+    // console.log("Form submitted:", formData);
     if (formData.email && formData.password) {
       try {
         const result = await loginAPI(formData);
